@@ -13,3 +13,10 @@ n_hidden_1 = 64
 n_hidden_2 = 32
 n_hidden_3 = 16
 classes = 2
+
+[results]
+metrics = True
+plotting_loss = False
+plotting_acc = True
+summary_net = True
+
