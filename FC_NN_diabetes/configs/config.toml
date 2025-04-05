@@ -15,8 +15,8 @@ n_hidden_3 = 16
 classes = 2
 
 [results]
-metrics = 1
-plotting_loss = 0
-plotting_acc = 1
-summary_net = 1
+metrics = true
+plotting_loss = false
+plotting_acc = true
+summary_net = true
 
