@@ -1,0 +1,48 @@
+from tqdm import tqdm
+import toml
+import torch
+from torch.utils.data import DataLoader
+
+from nodes.CustomDataset import CustomDataset
+from nodes.DiabedNet import DiabedNet
+from nodes.TrainingNN import TrainingNN
+from utils_local.ClassificationMetrics import ClassificationMetrics
+from utils_local.utils import random_seed, plotting, summary_model
+
+def main() -> None:
+    config = toml.load("configs/config.toml")
+    random_seed()
+
+    # Dataset
+    train_dataset = CustomDataset(config, train=True)
+    test_dataset = CustomDataset(config, train=False)
+
+    # DataLoader
+    train_dataloader = DataLoader(train_dataset, batch_size=len(train_dataset), shuffle=True)
+    test_dataloader = DataLoader(test_dataset, batch_size=len(test_dataset), shuffle=False)
+
+    # Model
+    model = DiabedNet(config) 
+                    
+    # Loss function
+    loss = torch.nn.CrossEntropyLoss(torch.tensor([0.3, 0.7]))
+    # Optimizer
+    optimizer = torch.optim.Adam(model.parameters(), lr=config["training"]["learning_rate"])
+
+    # Training procedure
+    training_NN = TrainingNN(config, train_dataloader, test_dataloader)
+    training_NN.training(model, loss, optimizer)
+    train_loss_history, train_accuracy_history, test_loss_history, test_accuracy_history = training_NN.get_history()
+
+    # Results test
+    classification_metrics = ClassificationMetrics(test_dataloader)
+    classification_metrics.report(model)
+    print(f'\nClassification Report:\n {classification_metrics.report(model)}')
+    
+    print(summary_model(model, config))
+    
+    # plotting(train_loss_history, test_loss_history, "Loss")    
+    plotting(train_accuracy_history, test_accuracy_history, "Accuracy")
+
+if __name__ == "__main__":
+    main()
